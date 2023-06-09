@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 4000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // Middleware
 app.use(cors());
@@ -25,7 +25,54 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
+const classesCollection = client.db('sportsDB').collection('classes');
+const instructorsCollection = client.db('sportsDB').collection('instructors');
+const selectCollection = client.db('sportsDB').collection('select');
+// All classes api data
+app.post('/addClass',async(req, res)=>{
+const query = req.body;
+const result = await classesCollection.insertOne(query);
+res.send(result);
+})
+
+app.get('/allClasses', async (req, res)=>{
+const result = await classesCollection.find().toArray();
+res.send(result);
+})   
+
+// add to select class api
+app.post('/selectClass', async(req, res)=>{
+const query = req.body;
+const result = await selectCollection.insertOne(query);
+res.send(result)
+})
+
+app.get('/selectClass',async(req, res)=>{
+const email = req.query.email;
+console.log(email)
+if(!email){
+res.send([]);
+}
+const query = { email: email }
+const result = await selectCollection.find(query).toArray();
+res.send(result);
+})
+
+app.delete('/selectClass/:id', async(req,res)=>{
+const id = req.params.id;
+const query = {_id: new ObjectId(id)}
+const result = await selectCollection.deleteOne(query);
+res.send(result);
+})
+
+//All instructors get data
+app.get('/allInstructors', async (req, res)=>{
+const result = await instructorsCollection.find().toArray();
+res.send(result);
+})
+
+
+// Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
