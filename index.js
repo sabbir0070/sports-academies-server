@@ -284,8 +284,7 @@ async function run() {
       const result = await selectCollection.deleteOne(query);
       res.send(result);
     })
-
-
+// User Select button click to set mongodb
     app.post("/selectClass", async (req, res) => {
       const item = req.body;
 
