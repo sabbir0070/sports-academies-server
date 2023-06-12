@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
@@ -44,11 +44,9 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+
     const usersCollection = client.db('sportsDB').collection('users');
     const classesCollection = client.db('sportsDB').collection('classes');
-    const instructorsCollection = client.db('sportsDB').collection('instructors');
     const selectCollection = client.db('sportsDB').collection('select');
     const paymentCollection = client.db('sportsDB').collection('payment');
 
@@ -67,6 +65,7 @@ async function run() {
       const user = await usersCollection.findOne(query);
       if (user?.role !== "admin") {
         return res
+
           .status(403)
           .send({ error: true, message: "forbidden message" });
       }
@@ -85,6 +84,7 @@ async function run() {
       }
       next();
     };
+
 
     // user related apis
     app.get('/users', async (req, res) => {
@@ -177,17 +177,15 @@ async function run() {
       res.send(result);
     })
 
-    // home popular Class and Classes route this approve class show
-    app.get('/allApprovedClasses', async (req, res) => {
-
-      const result = await classesCollection.find({ status: 'approved' }).toArray();
+    // admin manage Users for APi show data all add instructor Class
+    app.get('/allClasses', async (req, res) => {
+      const result = await classesCollection.find().toArray();
       res.send(result);
     })
 
-    // admin manage Users for APi show data all add instructor Class
-    app.get('/allClasses', async (req, res) => {
-
-      const result = await classesCollection.find().toArray();
+    // home page Class and all Classes route this approve class show
+    app.get('/allApprovedClasses/:text', async (req, res) => {
+      const result = await classesCollection.find({ status: req.params.text }).toArray();
       res.send(result);
     })
 
@@ -267,12 +265,6 @@ async function run() {
       res.send(result);
     })
 
-    // User add to select class api eita amr code drkr commnet korlam*****
-    // app.post('/selectClass', async (req, res) => {
-    //   const query = req.body;
-    //   const result = await selectCollection.insertOne(query);
-    //   res.send(result)
-    // })
 
     /* ---------------------------------
     // payment er jonno kaj start
@@ -285,7 +277,6 @@ async function run() {
       res.send(result);
     });
 
-
     // select Class cats theke delete
     app.delete('/selectClass/:id', async (req, res) => {
       const id = req.params.id;
@@ -294,17 +285,9 @@ async function run() {
       res.send(result);
     })
 
-    // i donot know use this api new***
 
     app.post("/selectClass", async (req, res) => {
       const item = req.body;
-
-      // const query = { selectClassId: item.selectClassId };
-      // const existingCart = await selectCollection.findOne(query);
-
-      // if (existingCart) {
-      //   return res.send({ message: "user already exists" });
-      // }
 
       const result = await selectCollection.insertOne(item);
       return res.send(result);
@@ -386,23 +369,22 @@ async function run() {
     })
 
     //All instructors get data
-    app.get('/allInstructors/:role', async (req, res) => {
-      const result = await usersCollection.find({ role: req.params.id }).toArray();
+    app.get(`/allInstructors/:text`, async (req, res) => {
+      console.log(req.params.text);
+
+      const result = await usersCollection.find({ role: req.params.text }).toArray();
       res.send(result);
     })
-    app.get('/popularInstructors/:role', async (req, res) => {
+    app.get(`/popularInstructors/:text`, async (req, res) => {
       const limitInstructor = 6;
-      const result = await usersCollection.find({ role: req.params.id }).limit(limitInstructor).toArray();
+      const result = await usersCollection.find({ role: req.params.text }).limit(limitInstructor).toArray();
       res.send(result);
     })
 
 
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+   
   }
 }
 run().catch(console.dir);
