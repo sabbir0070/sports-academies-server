@@ -249,7 +249,7 @@ async function run() {
       res.send(result)
     })
 
-    // ok
+    // ok selected class get
     app.get('/selectClass', verifyJWT, async (req, res) => {
       const email = req.query.email;
       console.log(email)
