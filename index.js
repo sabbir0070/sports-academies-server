@@ -192,9 +192,11 @@ async function run() {
     })
 
     // Home page popular class show get api routes
-    app.get('/popularClass', async (req, res) => {
-      const query = {};
-      const result = await classesCollection.find(query).sort({ student: -1 }).toArray();
+    app.get('/popularClass/:status', async (req, res) => {
+      console.log(req.params.status);
+      // const query = { _id: }
+      const limitClass = 6;
+      const result = await classesCollection.find({ status: req.params.status }).sort({ student: -1 }).limit(limitClass).toArray();
       res.send(result);
     })
 
@@ -384,8 +386,13 @@ async function run() {
     })
 
     //All instructors get data
-    app.get('/allInstructors', async (req, res) => {
-      const result = await instructorsCollection.find().toArray();
+    app.get('/allInstructors/:role', async (req, res) => {
+      const result = await usersCollection.find({ role: req.params.id }).toArray();
+      res.send(result);
+    })
+    app.get('/popularInstructors/:role', async (req, res) => {
+      const limitInstructor = 6;
+      const result = await usersCollection.find({ role: req.params.id }).limit(limitInstructor).toArray();
       res.send(result);
     })
 
